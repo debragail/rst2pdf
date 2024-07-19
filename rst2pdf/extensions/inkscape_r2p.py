@@ -15,6 +15,8 @@ the vectorpdf code to process the PDF.
 import sys, os, tempfile, subprocess
 from weakref import WeakKeyDictionary
 from rst2pdf.log import log
+from security import safe_command
+
 try:
     from  vectorpdf_r2p import VectorPdf
 except:
@@ -63,7 +65,7 @@ class InkscapeImage(VectorPdf):
                 # Inkscape 1.x uses --export-file
                 cmd = [progname, os.path.abspath(filename), '--export-file=%s' % pdffname]
             try:
-                result = subprocess.call(cmd)
+                result = safe_command.run(subprocess.call, cmd)
                 if result != 0:
                     log.error("Failed to run command: %s", ' '.join(cmd))
             except OSError:
@@ -95,7 +97,7 @@ class InkscapeImage(VectorPdf):
                 # Inkscape 1.x uses --export-file
                 cmd = [progname, os.path.abspath(filename), '--export-file=%s' % pngfname, '-d', str(client.def_dpi)]
             try:
-                subprocess.call(cmd)
+                safe_command.run(subprocess.call, cmd)
                 return pngfname
             except OSError:
                 log.error("Failed to run command: %s", ' '.join(cmd))
@@ -107,7 +109,7 @@ class InkscapeImage(VectorPdf):
         """
         Execute a command and return exitcode, stdout and stderr.
         """
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = safe_command.run(subprocess.Popen, cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = proc.communicate()
         exitcode = proc.returncode
         return exitcode, out.decode(), err.decode()

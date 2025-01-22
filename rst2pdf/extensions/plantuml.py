@@ -18,6 +18,7 @@ import rst2pdf.genelements as genelements
 from rst2pdf.image import MyImage
 import tempfile
 import subprocess
+from security import safe_command
 
 class plantuml(nodes.General, nodes.Element):
     pass
@@ -66,7 +67,7 @@ class UMLHandler(genelements.NodeHandler, plantuml):
             args+=' -tsvg'
         client.to_unlink.append(tfile.name)
         try:
-            p = subprocess.Popen(args.split(), stdout=tfile,
+            p = safe_command.run(subprocess.Popen, args.split(), stdout=tfile,
                                  stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         except OSError as err:
             if err.errno != errno.ENOENT:
